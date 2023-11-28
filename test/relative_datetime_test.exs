@@ -17,6 +17,6 @@ defmodule RelativeDateTimeTest do
     assert {:ok, ~U[2018-01-01 00:00:00Z]} = RelativeDateTime.parse("2018-01-01", @now)
 
     # Not yet supported
-    assert :error = RelativeDateTime.parse("2018-06-01T00:00:00Z", @now)
+    assert {:ok, ~U[2018-06-01 12:34:56Z]} = RelativeDateTime.parse("2018-06-01 12:34:56", @now)
   end
 end
