@@ -1,5 +1,5 @@
 defmodule RelativeDateTimeTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   @now ~U[2018-01-01 00:00:00Z]
 

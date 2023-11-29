@@ -37,7 +37,11 @@ defmodule RelativeDateTime do
 
   @doc """
   Parses a given relative datetime string and returns a datetime.
+
+  iex> RelativeDateTime.parse("3 days ago", ~U[2018-01-01 00:00:00Z])
+  {:ok, ~U[2017-12-29 00:00:00Z]}
   """
+  @spec parse(String.t(), DateTime.t()) :: {:ok, DateTime.t()} | :error
   def parse(relative, datetime) do
     case parse_relative_datetime(relative) do
       {:ok, [now: "now"], _, _, _, _} ->
