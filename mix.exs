@@ -21,7 +21,7 @@ defmodule RelativeDatetime.MixProject do
 
   defp deps do
     [
-      {:date_time_parser, github: "mwhitworth/date_time_parser", ref: "9b29818"},
+      {:date_time_parser, "~> 1.2"},
       {:timex, "~> 3.0"},
       {:nimble_parsec, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
