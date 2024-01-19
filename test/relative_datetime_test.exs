@@ -13,10 +13,14 @@ defmodule RelativeDateTimeTest do
     assert {:ok, ~U[2017-12-26 00:00:00Z]} = RelativeDateTime.parse("6 days ago", @now)
     assert {:ok, ~U[2017-07-01 00:00:00Z]} = RelativeDateTime.parse("6 months ago", @now)
     assert {:ok, ~U[2012-01-01 00:00:00Z]} = RelativeDateTime.parse("6 years ago", @now)
-    assert :error = RelativeDateTime.parse("nonsense", @now)
-    assert {:ok, ~U[2018-01-01 00:00:00Z]} = RelativeDateTime.parse("2018-01-01", @now)
+  end
 
-    # Not yet supported
+  test "returns error for unparsable datetimes" do
+    assert :error = RelativeDateTime.parse("nonsense", @now)
+  end
+
+  test "parses given datetimes" do
+    assert {:ok, ~U[2018-01-01 00:00:00Z]} = RelativeDateTime.parse("2018-01-01", @now)
     assert {:ok, ~U[2018-06-01 12:34:56Z]} = RelativeDateTime.parse("2018-06-01 12:34:56", @now)
   end
 end
