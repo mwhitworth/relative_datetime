@@ -17,6 +17,8 @@ defmodule RelativeDateTimeTest do
 
   test "returns error for unparsable datetimes" do
     assert :error = RelativeDateTime.parse("nonsense", @now)
+    assert :error = RelativeDateTime.parse("sox weeks ago", @now)
+    assert :error = RelativeDateTime.parse("2018-13-01", @now)
   end
 
   test "parses given datetimes" do
