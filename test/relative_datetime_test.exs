@@ -26,5 +26,7 @@ defmodule RelativeDateTimeTest do
   test "parses given datetimes" do
     assert {:ok, ~U[2018-01-01 00:00:00Z]} = parse("2018-01-01", @now)
     assert {:ok, ~U[2018-06-01 12:34:56Z]} = parse("2018-06-01 12:34:56", @now)
+    assert {:ok, ~U[2018-06-01 12:34:56.789Z]} = parse("2018-06-01 12:34:56.789", @now)
+    assert {:ok, ~U[2018-06-01 12:34:56.789123Z]} = parse("2018-06-01 12:34:56.789123", @now)
   end
 end

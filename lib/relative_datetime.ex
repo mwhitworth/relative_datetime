@@ -47,17 +47,24 @@ defmodule RelativeDateTime do
       {:ok, [now: "now"], _, _, _, _} ->
         {:ok, datetime}
 
-      {:ok, [year: year, month: month, day: day, hour: hour, minute: minute, second: second], "",
-       _, _, _} ->
+      {:ok,
+       [
+         {:year, year},
+         {:month, month},
+         {:day, day},
+         {:hour, hour},
+         {:minute, minute},
+         {:second, second} | _
+       ] = args, "", _, _, _} ->
         {:ok,
          Date.new!("#{year}" |> String.to_integer(), month, day)
-         |> DateTime.new!(Time.new!(hour, minute, second))}
+         |> DateTime.new!(Time.new!(hour, minute, second, microseconds(args)))}
 
       {:ok, [year: year, month: month, day: day], "", _, _, _} ->
         {:ok,
          Date.new!("#{year}" |> String.to_integer(), month, day) |> DateTime.new!(~T[00:00:00])}
 
-      {:ok, args, "", _, _, _} ->
+      {:ok, [{:amount, _}, {:unit, _} | _] = args, "", _, _, _} ->
         {:ok, apply_relative_datetime(datetime, Map.new(args))}
 
       _ ->
@@ -70,5 +77,21 @@ defmodule RelativeDateTime do
   defp apply_relative_datetime(datetime, %{amount: amount, unit: unit} = args) do
     datetime
     |> Timex.shift([{unit, amount * Map.get(args, :multiplier, 1)}])
+  end
+
+  defp microseconds(time) do
+    case Keyword.fetch(time, :microsecond) do
+      :error ->
+        {0, 0}
+
+      {:ok, microsecond} ->
+        accuracy = length(microsecond)
+        multiplier = Integer.pow(10, 6 - accuracy)
+
+        microsecond =
+          microsecond |> :string.to_integer() |> elem(0) |> Kernel.*(multiplier)
+
+        {microsecond, accuracy}
+    end
   end
 end
