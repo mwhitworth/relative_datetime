@@ -9,6 +9,8 @@ defmodule RelativeDatetime.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "Relative datetime parser",
+      aliases: aliases(),
+      preferred_cli_env: [ci: :test],
       package: package()
     ]
   end
@@ -35,6 +37,17 @@ defmodule RelativeDatetime.MixProject do
       files: ["lib", "mix.exs", "README.md"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/mwhitworth/relative_datetime"}
+    ]
+  end
+
+  defp aliases do
+    [
+      ci: [
+        "format --check-formatted",
+        "credo --strict",
+        "compile --warnings-as-errors --force",
+        "test"
+      ]
     ]
   end
 end
