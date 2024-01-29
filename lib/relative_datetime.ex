@@ -25,12 +25,28 @@ defmodule RelativeDateTime do
     |> ignore(string("s"))
     |> unwrap_and_tag(:unit)
 
+  relative_datetime_suffix = optional(ignore(whitespace) |> concat(ago))
+
+  relative_datetime_pattern =
+    number |> ignore(whitespace) |> concat(unit) |> tag(:relative_datetime)
+
+  relative_datetime_joiner =
+    choice([
+      ignore(whitespace) |> ignore(string("and")) |> ignore(whitespace),
+      ignore(optional(whitespace)) |> ignore(string(",")) |> ignore(whitespace),
+      ignore(whitespace)
+    ])
+
+  relative_datetime =
+    relative_datetime_pattern
+    |> optional(relative_datetime_joiner |> concat(relative_datetime_pattern))
+
   root =
     choice([
       now,
       parsec({DateTimeParser.Combinators, :parse_datetime}),
       parsec({DateTimeParser.Combinators, :parse_datetime_us}),
-      number |> ignore(whitespace) |> concat(unit) |> optional(ignore(whitespace) |> concat(ago))
+      relative_datetime |> concat(relative_datetime_suffix)
     ])
 
   defparsec(:parse_relative_datetime, root)
@@ -64,8 +80,8 @@ defmodule RelativeDateTime do
         {:ok,
          Date.new!("#{year}" |> String.to_integer(), month, day) |> DateTime.new!(~T[00:00:00])}
 
-      {:ok, [{:amount, _}, {:unit, _} | _] = args, "", _, _, _} ->
-        {:ok, apply_relative_datetime(datetime, Map.new(args))}
+      {:ok, args, "", _, _, _} ->
+        {:ok, apply_relative_datetime(datetime, args)}
 
       _ ->
         :error
@@ -74,9 +90,13 @@ defmodule RelativeDateTime do
 
   #
 
-  defp apply_relative_datetime(datetime, %{amount: amount, unit: unit} = args) do
-    datetime
-    |> Timex.shift([{unit, amount * Map.get(args, :multiplier, 1)}])
+  defp apply_relative_datetime(datetime, args) do
+    {multiplier, args} = Keyword.pop(args, :multiplier, 1)
+
+    for {:relative_datetime, [amount: amount, unit: unit]} <- args, reduce: datetime do
+      curr_datetime ->
+        Timex.shift(curr_datetime, [{unit, amount * multiplier}])
+    end
   end
 
   defp microseconds(time) do

@@ -17,6 +17,12 @@ defmodule RelativeDateTimeTest do
     assert {:ok, ~U[2012-01-01 00:00:00Z]} = parse("6 years ago", @now)
   end
 
+  test "combinations of relative dates" do
+    assert {:ok, ~U[2017-12-31 23:53:54.000000Z]} = parse("6 minutes and 6 seconds ago", @now)
+    assert {:ok, ~U[2017-12-31 23:53:54.000000Z]} = parse("6 minutes, 6 seconds ago", @now)
+    assert {:ok, ~U[2017-12-31 23:53:54.000000Z]} = parse("6 minutes 6 seconds ago", @now)
+  end
+
   test "returns error for unparsable datetimes" do
     assert :error = parse("nonsense", @now)
     assert :error = parse("sox weeks ago", @now)
