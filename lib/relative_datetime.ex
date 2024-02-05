@@ -25,6 +25,14 @@ defmodule RelativeDateTime do
     |> ignore(string("s"))
     |> unwrap_and_tag(:unit)
 
+  relative_day_pronoun =
+    choice([
+      string("today") |> replace(amount: 0, unit: :days),
+      string("yesterday") |> replace(amount: -1, unit: :days),
+      string("tomorrow") |> replace(amount: 1, unit: :days)
+    ])
+    |> unwrap_and_tag(:relative_datetime)
+
   relative_datetime_suffix = optional(ignore(whitespace) |> concat(ago))
 
   relative_datetime_pattern =
@@ -44,6 +52,7 @@ defmodule RelativeDateTime do
   root =
     choice([
       now,
+      relative_day_pronoun,
       parsec({DateTimeParser.Combinators, :parse_datetime}),
       parsec({DateTimeParser.Combinators, :parse_datetime_us}),
       relative_datetime |> concat(relative_datetime_suffix)
