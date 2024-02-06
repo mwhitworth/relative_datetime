@@ -41,4 +41,12 @@ defmodule RelativeDateTimeTest do
     assert {:ok, ~U[2017-12-31 00:00:00Z]} = parse("yesterday", @now)
     assert {:ok, ~U[2018-01-02 00:00:00Z]} = parse("tomorrow", @now)
   end
+
+  test "temporal pronouns (days) with times" do
+    assert {:ok, ~U[2018-01-01 12:00:00.000000Z]} = parse("12:00 today", @now)
+    assert {:ok, ~U[2018-01-01 00:01:00.000000Z]} = parse("00:01 today", @now)
+    assert {:ok, ~U[2018-01-01 23:01:00.000000Z]} = parse("23:01 today", @now)
+    assert {:ok, ~U[2017-12-31 12:00:00.000000Z]} = parse("12:00 yesterday", @now)
+    assert {:ok, ~U[2018-01-02 12:00:00.000000Z]} = parse("12:00 tomorrow", @now)
+  end
 end
