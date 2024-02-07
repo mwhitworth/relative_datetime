@@ -25,6 +25,21 @@ defmodule RelativeDateTime do
     |> ignore(string("s"))
     |> unwrap_and_tag(:unit)
 
+  hour =
+    choice([
+      ignore(string("0")) |> integer(1),
+      ignore(string("1")) |> integer(1) |> map({Kernel, :+, [10]}),
+      ignore(string("2"))
+      |> ascii_char([?0..?3])
+      |> map({Kernel, :+, [20 - ?0]})
+    ])
+    |> map({:add_unit, [:hours]})
+    |> unwrap_and_tag(:relative_datetime)
+
+  minute = integer(2) |> map({:add_unit, [:minutes]}) |> unwrap_and_tag(:relative_datetime)
+
+  time_of_day = hour |> ignore(string(":")) |> concat(minute)
+
   relative_day_pronoun =
     choice([
       string("today") |> replace(amount: 0, unit: :days),
@@ -49,10 +64,16 @@ defmodule RelativeDateTime do
     relative_datetime_pattern
     |> optional(relative_datetime_joiner |> concat(relative_datetime_pattern))
 
+  time_of_day_and_relative_day_pronoun =
+    time_of_day
+    |> ignore(whitespace)
+    |> concat(relative_day_pronoun)
+
   root =
     choice([
       now,
       relative_day_pronoun,
+      time_of_day_and_relative_day_pronoun,
       parsec({DateTimeParser.Combinators, :parse_datetime}),
       parsec({DateTimeParser.Combinators, :parse_datetime_us}),
       relative_datetime |> concat(relative_datetime_suffix)
@@ -102,7 +123,8 @@ defmodule RelativeDateTime do
   defp apply_relative_datetime(datetime, args) do
     {multiplier, args} = Keyword.pop(args, :multiplier, 1)
 
-    for {:relative_datetime, [amount: amount, unit: unit]} <- args, reduce: datetime do
+    for {:relative_datetime, [amount: amount, unit: unit]} <- args,
+        reduce: datetime do
       curr_datetime ->
         Timex.shift(curr_datetime, [{unit, amount * multiplier}])
     end
@@ -122,5 +144,9 @@ defmodule RelativeDateTime do
 
         {microsecond, accuracy}
     end
+  end
+
+  defp add_unit(amount, unit) do
+    [amount: amount, unit: unit]
   end
 end
