@@ -22,7 +22,7 @@ defmodule RelativeDateTime do
       string("month") |> replace(:months),
       string("year") |> replace(:years)
     ])
-    |> ignore(string("s"))
+    |> optional(ignore(string("s")))
     |> unwrap_and_tag(:unit)
 
   hour =
@@ -47,6 +47,20 @@ defmodule RelativeDateTime do
       string("tomorrow") |> replace(amount: 1, unit: :days)
     ])
     |> unwrap_and_tag(:relative_datetime)
+
+  relative_pronoun =
+    choice([
+      string("last") |> replace(-1),
+      string("this") |> replace(0),
+      string("next") |> replace(1)
+    ])
+    |> unwrap_and_tag(:amount)
+
+  relative_pronoun_and_unit =
+    relative_pronoun
+    |> ignore(whitespace)
+    |> concat(unit)
+    |> tag(:relative_datetime)
 
   relative_datetime_suffix = optional(ignore(whitespace) |> concat(ago))
 
@@ -73,6 +87,7 @@ defmodule RelativeDateTime do
     choice([
       now,
       relative_day_pronoun,
+      relative_pronoun_and_unit,
       time_of_day_and_relative_day_pronoun,
       parsec({DateTimeParser.Combinators, :parse_datetime}),
       parsec({DateTimeParser.Combinators, :parse_datetime_us}),
