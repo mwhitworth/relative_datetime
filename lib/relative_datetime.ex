@@ -33,10 +33,10 @@ defmodule RelativeDateTime do
       |> ascii_char([?0..?3])
       |> map({Kernel, :+, [20 - ?0]})
     ])
-    |> map({:add_unit, [:hours]})
-    |> unwrap_and_tag(:relative_datetime)
+    |> map({:add_unit, [:hour]})
+    |> unwrap_and_tag(:absolute_datetime)
 
-  minute = integer(2) |> map({:add_unit, [:minutes]}) |> unwrap_and_tag(:relative_datetime)
+  minute = integer(2) |> map({:add_unit, [:minute]}) |> unwrap_and_tag(:absolute_datetime)
 
   time_of_day = hour |> ignore(string(":")) |> concat(minute)
 
@@ -123,10 +123,16 @@ defmodule RelativeDateTime do
   defp apply_relative_datetime(datetime, args) do
     {multiplier, args} = Keyword.pop(args, :multiplier, 1)
 
-    for {:relative_datetime, [amount: amount, unit: unit]} <- args,
+    for {operation, [amount: amount, unit: unit]} <- args,
         reduce: datetime do
       curr_datetime ->
-        Timex.shift(curr_datetime, [{unit, amount * multiplier}])
+        case operation do
+          :relative_datetime ->
+            Timex.shift(curr_datetime, [{unit, amount * multiplier}])
+
+          :absolute_datetime ->
+            Timex.set(curr_datetime, [{unit, amount}])
+        end
     end
   end
 
