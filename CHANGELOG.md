@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+* basic implementation of this / next / last + unit (#15)
+* fix HH:MM today / yesterday / tomorrow arithmetic (#14)
+
 ## 0.2.0
 
 * HH:MM + today / yesterday / tomorrow (#12)
